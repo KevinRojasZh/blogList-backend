@@ -74,7 +74,6 @@ Crea un archivo `.env` en la raíz del proyecto con lo siguiente:
 ```env
 MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>/<nombre_bd>
 TEST_MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>/<nombre_test_bd>
-PORT=3003
 ```
 
 ### 4️⃣ Ejecutar en modo desarrollo
