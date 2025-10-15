@@ -13,19 +13,32 @@ const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 
 logger.info('connecting to', config.MONGODB_URI)
-
-mongoose.connect(config.MONGODB_URI)
-  .then(() => {
+/**
+ *! LA FUNCION connectToDataBase DEBERIA ESTAR EN LA CARPETA UTILS E IMPORTARLA AQUI
+ */
+const connectToDataBase = async() => {
+  try{
+    await mongoose.connect(config.MONGODB_URI)
     logger.info('connected to MongoDB')
-  })
-  .catch((error) => {
-    logger.error('error connecting to MongoDB:', error.message)
-  })
+  }catch(error){
+  logger.error('error connecting to MongoDB:', error.message)
+  }
+}
+
+connectToDataBase()
+
+// mongoose.connect(config.MONGODB_URI)
+//   .then(() => {
+//     logger.info('connected to MongoDB')
+//   })
+//   .catch((error) => {
+//     logger.error('error connecting to MongoDB:', error.message)
+//   })
 
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
-// app.use(middleware.requestLogger)
+app.use(middleware.requestLogger)
 
 app.use('/api/blog', blogRouter)
 
@@ -33,6 +46,7 @@ app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
 module.exports = app
+
 
 
 
