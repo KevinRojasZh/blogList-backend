@@ -1,4 +1,3 @@
-const { min } = require('lodash')
 const mongoose = require('mongoose')
 
 const blogSchema = new mongoose.Schema({
@@ -7,16 +6,25 @@ const blogSchema = new mongoose.Schema({
     required:true,
     minLength:3
   },
+
   author: String,
+
   url: {
     type:String,
     required:true,
   },
+
   likes:{
     type:Number,
     default:0,
     min:0
-  }
+  },
+
+  user:[{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+  }]
+
 })
 
 const Blog = mongoose.model('Blog', blogSchema)
