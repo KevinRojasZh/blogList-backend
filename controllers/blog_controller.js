@@ -2,30 +2,36 @@ const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
 const logger = require('../utils/logger')
 const User = require('../models/user') // Importamos el modelo de Usuario
-const jwt = require('jsonwebtoken')
+const middleware = require('../utils/middleware')
+
+
 
 
 //-------- METODOS -----------------------------------------
-
-// GET ALL BLOGS: Ruta para obtener todos los blogs
+/**
+ *! GET ALL BLOGS: Ruta para obtener todos los blogs
+ */
 blogRouter.get('/',async (request, response) => {
 // Busca todos los documentos de la colección 'Blog'.
 // .populate('user', { userName: 1, name: 1 }) es crucial: reemplaza el ObjectId del campo 'user'
 // con los datos reales del usuario (solo userName y name), facilitando la lectura en el frontend.
 const blogs = await Blog.find({}).populate('user',{ userName:1, name:1 })
 // Envía la lista completa de blogs como respuesta JSON.
-  response.json(blogs)
+  response.status(200).json(blogs)
 })
 
-// POST NEW BLOG: Ruta para crear un nuevo blog
-blogRouter.post('/',async(request, response) => {
+/**
+ *! POST NEW BLOG: Ruta para crear un nuevo blog
+*/
+blogRouter.post('/',middleware.tokenExtractor,middleware.userExtract,async(request, response) => {
   const body = request.body
-  const decodeToken = jwt.verify(request.token, process.env.SECRET)
 
-  if(!decodeToken.id){
-    response.status(401).json({ error:'token invalid' })
+  const user = await User.findById(request.user)
+
+  if (!user) {
+    return response.status(401).json({ error: 'user not found' })
   }
-  const user = await User.findById(decodeToken.id)
+
 
 // Crea una nueva instancia del modelo Blog.
   const blog = new Blog({
@@ -34,7 +40,7 @@ blogRouter.post('/',async(request, response) => {
     url:body.url,
     likes:body.likes,
 // Vincula el blog al usuario: usa el campo 'user' del esquema y guarda el ObjectId del usuario en un array.
-    user:[user._id]
+    user:user._id
   })
 
 // Guarda el nuevo blog en la base de datos MongoDB.
@@ -50,8 +56,29 @@ blogRouter.post('/',async(request, response) => {
   response.status(201).json(result)
 })
 
-// GET 1 BLOG: Ruta para obtener un blog por ID
-blogRouter.get('/:id',async(request, response) => {
+/**
+ *! DELETE 1 BLOG: Ruta para borrar un blog por ID
+ */
+blogRouter.delete('/:id',middleware.tokenExtractor,middleware.userExtract,async(request, response) => {
+  const id = request.params.id
+  const blog = await Blog.findById(id)
+
+  if(!blog){
+    return response.status(404).json({ error:'Blog not found' })
+  }
+
+  if(blog.user.toString() === request.user.toString()){
+    await Blog.findByIdAndDelete(id)
+      return response.status(204).end()
+  } else{
+    return response.status(401).json({ error:'Unauthorized user' })
+  }
+})
+
+/**
+ *! GET 1 BLOG: Ruta para obtener un blog por ID
+ */
+blogRouter.get('/:id',middleware.tokenExtractor,middleware.userExtract,async(request, response) => {
 // Obtiene el ID del blog de los parámetros de la URL.
   const id = request.params.id
 
@@ -68,25 +95,10 @@ blogRouter.get('/:id',async(request, response) => {
   }
 })
 
-// DELETE 1 BLOG: Ruta para borrar un blog por ID
-blogRouter.delete('/:id',async(request, response) => {
-  const id = request.params.id
-  try{
-  // Busca y elimina el documento por ID.
-    await Blog.findByIdAndDelete(id)
-
-  // Responde con 204 No Content, indicando que la operación fue exitosa pero no hay cuerpo que devolver.
-    response.status(204).end()
-  }catch(error){
-  // Captura errores de la base de datos o de Mongoose (ej. ID no válido).
-    logger.error('error connecting to MongoDB:', error.message)
-  // No se envía respuesta al cliente aquí, lo que podría colgar la petición. 
-  // Lo ideal sería enviar un status 500 o 400 al cliente también.
-  }
-})
-
-// MODIFICATE 1 BLOG: Ruta para actualizar un blog por ID (PATCH/PUT)
-blogRouter.patch('/:id',async(request, response) => {
+/**
+ *! MODIFICATE 1 BLOG: Ruta para actualizar un blog por ID (PATCH/PUT)
+ */
+blogRouter.patch('/:id',middleware.tokenExtractor,middleware.userExtract,async(request, response) => {
   const id = request.params.id
   const body = request.body // Datos a actualizar (ej. { likes: 10 })
 

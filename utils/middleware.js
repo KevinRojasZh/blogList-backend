@@ -1,5 +1,5 @@
-const { request } = require('../app')
 const logger = require('./logger')
+const jwt = require('jsonwebtoken')
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -27,9 +27,18 @@ const tokenExtractor = (request,response, next) => {
   next()
 }
 
-
-
-
+const userExtract = (request,response,next) => {
+  if(!request.token){
+    return next()
+  }
+  const decodeToken = jwt.verify(request.token, process.env.SECRET)
+if(!decodeToken.id){
+  throw new Error ('Token dont have Id')
+}
+  const userId = decodeToken.id
+  request.user = userId
+  next()
+}
 
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message)
@@ -53,5 +62,6 @@ module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
-  tokenExtractor
+  tokenExtractor,
+  userExtract
 }

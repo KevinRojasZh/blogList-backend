@@ -35,7 +35,7 @@ loginRouter.post('/',async(request, response) => {
   if (!(user && passwordCorrect)){
 // Si falla, devuelve un código 401 Unauthorized y un mensaje de error genérico (seguridad).
     response.status(401).json({
-      erro:'invalid username or password'
+      error:'invalid username or password'
     })
   }
 

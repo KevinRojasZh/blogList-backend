@@ -29,21 +29,13 @@ const connectToDataBase = async() => {
 
 connectToDataBase()
 
-// mongoose.connect(config.MONGODB_URI)
-//   .then(() => {
-//     logger.info('connected to MongoDB')
-//   })
-//   .catch((error) => {
-//     logger.error('error connecting to MongoDB:', error.message)
-//   })
-
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.requestLogger)
-app.use(middleware.tokenExtractor)
 
-app.use('/api/blog', blogRouter)
+
+app.use('/api/blog',middleware.userExtract, blogRouter)
 app.use('/api/user', userRouter)
 app.use('/api/loggin', loginRouter)
 

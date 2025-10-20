@@ -20,10 +20,10 @@ const blogSchema = new mongoose.Schema({
     min:0
   },
 
-  user:[{
+  user:{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
-  }]
+  }
 
 })
 
