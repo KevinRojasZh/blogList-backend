@@ -16,9 +16,9 @@ const unknownEndpoint = (request, response) => {
 const tokenExtractor = (request,response, next) => {
   const token = request.get('Authorization')
   if(!token){
-    return response.status(401).json({ error:'Token invalid' })
+    return response.status(401).json({ error:'Dont have TOKEN' })
   }
-  if(token.startsWith('Bearer')){
+  if(token.startsWith('Bearer ')){
     const cleanToken = token.replace('Bearer ', '')
     request.token = cleanToken
   }else{

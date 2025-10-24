@@ -35,7 +35,7 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 
 
-app.use('/api/blog',middleware.userExtract, blogRouter)
+app.use('/api/blog', blogRouter)
 app.use('/api/user', userRouter)
 app.use('/api/loggin', loginRouter)
 
