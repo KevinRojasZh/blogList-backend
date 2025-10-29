@@ -98,7 +98,7 @@ blogRouter.get('/:id',middleware.tokenExtractor,middleware.userExtract,async(req
 /**
  *! MODIFICATE 1 BLOG: Ruta para actualizar un blog por ID (PATCH/PUT)
  */
-blogRouter.patch('/:id',middleware.tokenExtractor,middleware.userExtract,async(request, response) => {
+blogRouter.patch('/:id',middleware.tokenExtractor,middleware.userExtract, async(request, response) => {
   const id = request.params.id
   const body = request.body // Datos a actualizar (ej. { likes: 10 })
 
